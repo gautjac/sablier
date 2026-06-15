@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: #1c1733;
+  /* dusk gradient + a faint warm horizon glow, like the last light through glass */
+  background-image:
+    radial-gradient(120% 90% at 50% -10%, rgba(231, 185, 138, 0.1), transparent 55%),
+    radial-gradient(100% 70% at 50% 115%, rgba(217, 138, 143, 0.1), transparent 60%),
+    radial-gradient(circle at 12% 18%, rgba(231, 185, 138, 0.05), transparent 40%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  background-attachment: fixed;
+  color: #f7f1e6;
+  font-family: "Spectral", Georgia, serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* a soft hairline at dusk */
+.hairline {
+  border: none;
+  height: 0;
+  border-top: 1px solid rgba(247, 241, 230, 0.14);
+}
+
+/* gentle custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(231, 185, 138, 0.22);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::selection {
+  background: rgba(231, 185, 138, 0.3);
+  color: #f7f1e6;
+}
+
+/* the day-card answer line: a single ruled line you write upon */
+.writeline {
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  width: 100%;
+  color: #f7f1e6;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  line-height: 2.1rem;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent calc(2.1rem - 1px),
+    rgba(247, 241, 230, 0.18) calc(2.1rem - 1px),
+    rgba(247, 241, 230, 0.18) 2.1rem
+  );
+}
+.writeline::placeholder {
+  color: rgba(185, 177, 207, 0.55);
+  font-style: italic;
+}
+
+/* falling sand: a column of grains drifting downward */
+.sand-grain {
+  position: absolute;
+  top: 0;
+  border-radius: 999px;
+  background: radial-gradient(circle, #f4e3c8, #e7b98a);
+  will-change: transform, opacity;
+  animation-name: fall;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.7, 1);
+  animation-iteration-count: infinite;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(var(--fall-dist, 120px));
+    opacity: 0;
+  }
+}
+
+.link-underline {
+  background-image: linear-gradient(rgba(231, 185, 138, 0.6), rgba(231, 185, 138, 0.6));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 100% 1px;
+  transition: background-size 0.25s ease;
+}
+.link-underline:hover {
+  background-size: 100% 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .sand-grain {
+    display: none;
+  }
+}
