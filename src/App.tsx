@@ -20,7 +20,14 @@ type View = "jour" | "vie";
 
 export default function App() {
   const { t, lang } = useLang();
-  const profile = useLiveQuery(() => db.profile.get(PROFILE_ID), [], undefined);
+  // Dexie's .get() resolves to `undefined` for a missing row, but we reserve
+  // `undefined` for "still loading" — coalesce a missing profile to `null` so a
+  // first-time visitor falls through to onboarding instead of hanging on the splash.
+  const profile = useLiveQuery(
+    () => db.profile.get(PROFILE_ID).then((p) => p ?? null),
+    [],
+    undefined,
+  );
   const today = todayISO();
   const todayAnswer = useLiveQuery(() => db.answers.get(today), [today], undefined);
   const streak = useLiveQuery(() => getStreak(), [], undefined);
