@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { db, type DailyAnswer } from "../db";
 import { fetchReframe } from "../api";
-import { FAMILY_LABEL, type Prompt } from "../prompts";
-import { frLongDate, todayISO } from "../time";
+import { type Prompt } from "../prompts";
+import { longDate, todayISO } from "../time";
+import { useLang } from "../i18n";
 
 /**
  * La carte du jour — the signature. One reflective prompt for today, a single
@@ -18,6 +19,7 @@ export default function DayCard({
   existing: DailyAnswer | undefined;
   onSaved: () => void;
 }) {
+  const { t, lang } = useLang();
   const today = todayISO();
   const [answer, setAnswer] = useState(existing?.answer ?? "");
   const [reframe, setReframe] = useState(existing?.reframe ?? "");
@@ -62,14 +64,13 @@ export default function DayCard({
         mode,
         prompt: prompt.text,
         answer: answer.trim() || undefined,
+        lang,
       });
       setReframe(res.text);
       // persist the reframe alongside whatever's written
       await save(res.text);
     } catch {
-      setReframeError(
-        "La lueur n'est pas venue cette fois — mais la carte t'attend, hors-ligne, comme toujours.",
-      );
+      setReframeError(t.dayCard.glowError);
     } finally {
       setLoadingReframe(false);
     }
@@ -85,14 +86,14 @@ export default function DayCard({
 
         <header className="flex items-baseline justify-between gap-3">
           <span className="font-sans text-[0.68rem] uppercase tracking-[0.22em] text-sand/80">
-            La carte du jour
+            {t.dayCard.kicker}
           </span>
           <span className="font-sans text-[0.68rem] uppercase tracking-[0.18em] text-haze/70">
-            {FAMILY_LABEL[prompt.family]}
+            {t.family[prompt.family]}
           </span>
         </header>
 
-        <p className="mt-2 font-sans text-xs text-haze/70">{frLongDate(today)}</p>
+        <p className="mt-2 font-sans text-xs text-haze/70">{longDate(today, lang)}</p>
 
         <h2 className="mt-6 font-display text-3xl font-medium leading-[1.25] text-bone sm:text-[2.5rem]">
           {prompt.text}
@@ -108,10 +109,10 @@ export default function DayCard({
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             onBlur={() => (hasAnswer || existing) && save()}
-            placeholder="Une ligne, un souffle, ce qui vient…"
+            placeholder={t.dayCard.placeholder}
             rows={2}
             className="writeline px-1 text-2xl"
-            aria-label="Ta réponse du jour"
+            aria-label={t.dayCard.answerAria}
           />
         </div>
 
@@ -120,20 +121,20 @@ export default function DayCard({
             onClick={() => save()}
             className="rounded-full bg-sand px-6 py-2.5 font-sans text-sm font-semibold text-dusk-deep transition hover:bg-sand-light hover:shadow-glow"
           >
-            {savedTick ? "Déposé ✓" : "Déposer dans le sable"}
+            {savedTick ? t.dayCard.saved : t.dayCard.save}
           </button>
 
           <button
             onClick={() => askLueur(hasAnswer ? "respond" : "reframe")}
             disabled={loadingReframe}
             className="rounded-full border border-sand/30 px-5 py-2.5 font-sans text-sm text-sand transition hover:border-sand/60 hover:bg-sand/5 disabled:opacity-50"
-            title="Une touche d'IA, facultative — la carte fonctionne sans elle."
+            title={t.dayCard.glowTitle}
           >
             {loadingReframe
               ? "…"
               : hasAnswer
-                ? "Une lueur en retour"
-                : "Un autre angle"}
+                ? t.dayCard.glowRespond
+                : t.dayCard.glowReframe}
           </button>
         </div>
 
@@ -145,7 +146,7 @@ export default function DayCard({
           <blockquote className="mt-6 animate-fadeIn border-l-2 border-rose/50 pl-4 font-serif text-lg italic leading-relaxed text-sand-light/90">
             {reframe}
             <footer className="mt-2 font-sans text-[0.65rem] uppercase not-italic tracking-[0.18em] text-haze/60">
-              une lueur · facultative
+              {t.dayCard.glowFooter}
             </footer>
           </blockquote>
         )}

@@ -18,8 +18,10 @@ export default async (req: Request, _context: Context) => {
   }
 
   const mode = body.mode === "respond" ? "respond" : "reframe";
+  const lang = body.lang === "en" ? "en" : "fr";
   const prompt = (body.prompt ?? "").trim();
-  if (!prompt) return json({ error: "Aucune carte fournie." }, 400);
+  if (!prompt)
+    return json({ error: lang === "en" ? "No card provided." : "Aucune carte fournie." }, 400);
 
   // Haiku is fast, but we still stream NDJSON for resilience: a keepalive
   // newline every 3s, then a final { result } | { error } line. The client
@@ -44,6 +46,7 @@ export default async (req: Request, _context: Context) => {
           mode,
           prompt,
           answer: body.answer,
+          lang,
         });
         done = true;
         clearInterval(beat);

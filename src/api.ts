@@ -9,6 +9,7 @@
  */
 
 export type ReframeMode = "reframe" | "respond";
+export type Lang = "fr" | "en";
 
 export interface ReframeRequest {
   mode: ReframeMode;
@@ -16,10 +17,12 @@ export interface ReframeRequest {
   prompt: string;
   /** the user's written answer (may be empty for a fresh reframe) */
   answer?: string;
+  /** which language the glimmer should be written in (default "fr") */
+  lang?: Lang;
 }
 
 export interface ReframeResult {
-  /** a short, tender reflection — 1 to 3 sentences, FR */
+  /** a short, tender reflection — 1 to 3 sentences, in the requested language */
   text: string;
 }
 

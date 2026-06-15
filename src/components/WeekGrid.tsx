@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { WEEKS_PER_YEAR, type LifeStats, parseISO, todayISO } from "../time";
+import { WEEKS_PER_YEAR, type LifeStats, monthYear, parseISO } from "../time";
+import { useLang, type Lang } from "../i18n";
 
 /**
  * La vie en semaines — a calm grid of one's life, 52 weeks per row, one row per
@@ -26,6 +27,7 @@ export default function WeekGrid({
   stats: LifeStats;
   birthdate: string;
 }) {
+  const { t, lang } = useLang();
   const { totalWeeks, weeksLived, currentWeekIndex, expectancyYears } = stats;
   const years = Math.round(expectancyYears);
   const cols = WEEKS_PER_YEAR;
@@ -79,7 +81,9 @@ export default function WeekGrid({
     setHover({ index, x: PAD + col * step + CELL / 2, y: PAD + row * step });
   }
 
-  const hoverInfo = hover ? describeWeek(hover.index, birthdate, weeksLived) : null;
+  const hoverInfo = hover
+    ? describeWeek(hover.index, birthdate, weeksLived, lang, t.week)
+    : null;
 
   return (
     <div className="relative w-full overflow-x-auto">
@@ -91,7 +95,7 @@ export default function WeekGrid({
         onPointerMove={onMove}
         onPointerLeave={() => setHover(null)}
         role="img"
-        aria-label={`La vie en semaines : ${weeksLived} semaines vécues sur ${totalWeeks}.`}
+        aria-label={t.life.gridAria(weeksLived, totalWeeks)}
       >
         {/* weeks ahead — open, faint */}
         <g
@@ -154,30 +158,34 @@ export default function WeekGrid({
   );
 }
 
+interface WeekDict {
+  title: (age: number, week: number) => string;
+  lived: string;
+  current: string;
+  ahead: string;
+}
+
 function describeWeek(
   index: number,
   birthdate: string,
   weeksLived: number,
+  lang: Lang,
+  week: WeekDict,
 ): { title: string; sub: string } {
   const ageYears = Math.floor(index / WEEKS_PER_YEAR);
   const weekInYear = (index % WEEKS_PER_YEAR) + 1;
   // approximate calendar date of this week's start
   const start = parseISO(birthdate);
   start.setDate(start.getDate() + index * 7);
-  const date = start.toLocaleDateString("fr-CA", { month: "long", year: "numeric" });
+  const date = monthYear(start, lang);
 
   let state: string;
-  if (index < weeksLived) state = "vécue";
-  else if (index === weeksLived) state = "cette semaine-ci";
-  else state = "à venir";
+  if (index < weeksLived) state = week.lived;
+  else if (index === weeksLived) state = week.current;
+  else state = week.ahead;
 
   return {
-    title: `${ageYears} ans · semaine ${weekInYear}`,
+    title: week.title(ageYears, weekInYear),
     sub: `${date} — ${state}`,
   };
-}
-
-/** small helper re-exported for the legend (kept in sync with todayISO use). */
-export function gridTodayISO(): string {
-  return todayISO();
 }

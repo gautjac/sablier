@@ -39,62 +39,30 @@ export interface LifeStats {
   currentWeekIndex: number;
   ageYears: number;
   percentLived: number; // 0..100
-  /** the season-of-life label */
-  season: Season;
+  /** language-independent season key; label/note come from the dictionary */
+  seasonKey: SeasonKey;
   expectancyYears: number;
 }
 
-export interface Season {
-  key: string;
-  /** FR label */
-  label: string;
-  /** a tender one-liner about this season */
-  note: string;
-}
+/** Stable, language-independent keys for the seasons of life. */
+export type SeasonKey =
+  | "aube"
+  | "matin"
+  | "avant-midi"
+  | "midi"
+  | "apres-midi"
+  | "doree"
+  | "crepuscule";
 
-/** Map an age to a gentle "season of life," oriented toward presence. */
-export function seasonForAge(age: number): Season {
-  if (age < 13)
-    return {
-      key: "aube",
-      label: "L'aube",
-      note: "Tout commence. Le monde est encore entièrement neuf.",
-    };
-  if (age < 20)
-    return {
-      key: "matin",
-      label: "Le matin",
-      note: "La lumière monte. On apprend qui l'on devient.",
-    };
-  if (age < 33)
-    return {
-      key: "avant-midi",
-      label: "L'avant-midi",
-      note: "L'élan des grands départs. Beaucoup de portes encore ouvertes.",
-    };
-  if (age < 47)
-    return {
-      key: "midi",
-      label: "Le plein midi",
-      note: "Le soleil au zénith. La pleine force du jour, à savourer.",
-    };
-  if (age < 60)
-    return {
-      key: "apres-midi",
-      label: "L'après-midi",
-      note: "La lumière s'incline et se fait plus douce, plus dorée.",
-    };
-  if (age < 73)
-    return {
-      key: "doree",
-      label: "L'heure dorée",
-      note: "Le temps des récoltes et de la transmission. Une lumière chaude.",
-    };
-  return {
-    key: "crepuscule",
-    label: "Le crépuscule",
-    note: "Le ciel se teinte. L'heure la plus belle, si on la regarde.",
-  };
+/** Map an age to a gentle "season of life" key, oriented toward presence. */
+export function seasonForAge(age: number): SeasonKey {
+  if (age < 13) return "aube";
+  if (age < 20) return "matin";
+  if (age < 33) return "avant-midi";
+  if (age < 47) return "midi";
+  if (age < 60) return "apres-midi";
+  if (age < 73) return "doree";
+  return "crepuscule";
 }
 
 /** Compute the life-in-weeks statistics from a birthdate + expectancy. */
@@ -125,15 +93,20 @@ export function computeLifeStats(
     currentWeekIndex,
     ageYears,
     percentLived,
-    season: seasonForAge(ageYears),
+    seasonKey: seasonForAge(ageYears),
     expectancyYears,
   };
 }
 
-/** Pretty French date, e.g. "samedi 14 juin 2026". */
-export function frLongDate(iso: string): string {
+/** The locale used for date/number formatting per language. */
+function localeFor(lang: "fr" | "en"): string {
+  return lang === "fr" ? "fr-CA" : "en-CA";
+}
+
+/** Pretty long date, e.g. "samedi 14 juin 2026" / "Saturday, June 14, 2026". */
+export function longDate(iso: string, lang: "fr" | "en"): string {
   const d = parseISO(iso);
-  return d.toLocaleDateString("fr-CA", {
+  return d.toLocaleDateString(localeFor(lang), {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -141,7 +114,13 @@ export function frLongDate(iso: string): string {
   });
 }
 
-/** A grouped integer with thin spaces, FR style (4 160). */
-export function frNum(n: number): string {
-  return Math.round(n).toLocaleString("fr-CA").replace(/ /g, " ");
+/** Month + year for a date, localized (e.g. "juin 2026" / "June 2026"). */
+export function monthYear(d: Date, lang: "fr" | "en"): string {
+  return d.toLocaleDateString(localeFor(lang), { month: "long", year: "numeric" });
 }
+
+/** A grouped integer, localized (FR thin spaces, EN commas). */
+export function localNum(n: number, lang: "fr" | "en"): string {
+  return Math.round(n).toLocaleString(localeFor(lang));
+}
+

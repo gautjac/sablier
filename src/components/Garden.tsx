@@ -1,5 +1,6 @@
 import type { Streak } from "../db";
 import Hourglass from "./Hourglass";
+import { useLang } from "../i18n";
 
 /**
  * The garden of kept cards — a small constellation of grains, one per answered
@@ -7,6 +8,7 @@ import Hourglass from "./Hourglass";
  * pressure: a missed day is never punished.
  */
 export default function Garden({ streak }: { streak: Streak }) {
+  const { t } = useLang();
   // the hourglass fills toward a gentle goal of ~30 kept days, then keeps a glow
   const goal = 30;
   const fill = Math.min(1, streak.totalAnswered / goal);
@@ -18,15 +20,12 @@ export default function Garden({ streak }: { streak: Streak }) {
   return (
     <section className="grid items-center gap-8 rounded-2xl border border-sand/15 bg-dusk-soft/40 p-7 sm:grid-cols-[auto_1fr]">
       <div className="flex justify-center">
-        <Hourglass fill={Math.max(0.08, fill)} size={104} label="le sablier" />
+        <Hourglass fill={Math.max(0.08, fill)} size={104} label={t.garden.hourglassLabel} />
       </div>
 
       <div>
-        <h3 className="font-display text-2xl font-medium text-bone">Ton jardin de cartes</h3>
-        <p className="mt-1 font-serif text-haze">
-          Chaque jour où tu réponds dépose un grain. Le sablier se remplit, sans
-          hâte.
-        </p>
+        <h3 className="font-display text-2xl font-medium text-bone">{t.garden.title}</h3>
+        <p className="mt-1 font-serif text-haze">{t.garden.intro}</p>
 
         <div className="mt-5 grid grid-cols-7 gap-2" style={{ maxWidth: 220 }}>
           {grains.map((on, i) => (
@@ -42,15 +41,14 @@ export default function Garden({ streak }: { streak: Streak }) {
         </div>
 
         <div className="mt-6 flex flex-wrap gap-6 font-sans">
-          <Figure n={streak.current} label="jours de suite" />
-          <Figure n={streak.longest} label="plus longue ritournelle" />
-          <Figure n={streak.totalAnswered} label="cartes déposées" />
+          <Figure n={streak.current} label={t.garden.current} />
+          <Figure n={streak.longest} label={t.garden.longest} />
+          <Figure n={streak.totalAnswered} label={t.garden.total} />
         </div>
 
         {streak.current === 0 && streak.totalAnswered > 0 && (
           <p className="mt-4 font-serif text-sm italic text-haze/80">
-            Une pause n'efface rien. Les grains déjà déposés restent. Reviens
-            quand tu veux.
+            {t.garden.pauseNote}
           </p>
         )}
       </div>

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { Profile } from "../db";
+import { useLang } from "../i18n";
+import LangToggle from "./LangToggle";
 
 /** A quiet modal to adjust birthdate / expectancy after onboarding. */
 export default function Settings({
@@ -11,6 +13,7 @@ export default function Settings({
   onSave: (birthdate: string, expectancyYears: number) => void;
   onClose: () => void;
 }) {
+  const { t } = useLang();
   const [birthdate, setBirthdate] = useState(profile.birthdate);
   const [expectancy, setExpectancy] = useState(profile.expectancyYears);
   const maxDate = new Date().toISOString().slice(0, 10);
@@ -25,13 +28,18 @@ export default function Settings({
         className="w-full max-w-md animate-riseIn rounded-2xl border border-sand/20 bg-dusk-soft p-7 shadow-card"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="font-display text-2xl font-medium text-bone">Réglages</h2>
-        <p className="mt-1 font-serif text-sm text-haze">
-          Tout reste sur cet appareil.
-        </p>
+        <h2 className="font-display text-2xl font-medium text-bone">{t.settings.title}</h2>
+        <p className="mt-1 font-serif text-sm text-haze">{t.settings.privacy}</p>
+
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <span className="font-sans text-xs uppercase tracking-[0.16em] text-haze">
+            {t.lang.label}
+          </span>
+          <LangToggle />
+        </div>
 
         <label className="mt-6 block font-sans text-xs uppercase tracking-[0.16em] text-haze">
-          Date de naissance
+          {t.settings.birthLabel}
         </label>
         <input
           type="date"
@@ -44,7 +52,7 @@ export default function Settings({
         />
 
         <label className="mt-5 block font-sans text-xs uppercase tracking-[0.16em] text-haze">
-          Espérance de vie : {expectancy} ans
+          {t.settings.expectancyLabel(expectancy)}
         </label>
         <input
           type="range"
@@ -57,14 +65,14 @@ export default function Settings({
 
         <div className="mt-7 flex justify-end gap-3">
           <button onClick={onClose} className="font-sans text-sm text-haze hover:text-bone">
-            Annuler
+            {t.settings.cancel}
           </button>
           <button
             disabled={!valid}
             onClick={() => valid && onSave(birthdate, expectancy)}
             className="rounded-full bg-sand px-6 py-2.5 font-sans text-sm font-semibold text-dusk-deep transition enabled:hover:bg-sand-light disabled:opacity-40"
           >
-            Enregistrer
+            {t.settings.save}
           </button>
         </div>
       </div>

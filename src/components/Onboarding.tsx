@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Hourglass from "./Hourglass";
+import { useLang } from "../i18n";
 
 /**
  * Light, warm first-run. One question: your birthdate (and, gently tucked away,
@@ -10,6 +11,7 @@ export default function Onboarding({
 }: {
   onDone: (birthdate: string, expectancyYears: number) => void;
 }) {
+  const { t } = useLang();
   const [step, setStep] = useState<0 | 1>(0);
   const [birthdate, setBirthdate] = useState("");
   const [expectancy, setExpectancy] = useState(80);
@@ -27,23 +29,22 @@ export default function Onboarding({
               <Hourglass fill={0.18} size={120} />
             </div>
             <h1 className="font-display text-5xl font-medium tracking-tight text-bone sm:text-6xl">
-              Sablier
+              {t.appName}
             </h1>
             <p className="mx-auto mt-5 max-w-md font-serif text-lg leading-relaxed text-haze">
-              Un instrument tendre de présence. La vie en semaines, une carte de
-              réflexion chaque jour, et la lente, belle chute du sable.
+              {t.onboarding.intro}
             </p>
             <p className="mx-auto mt-3 max-w-sm font-serif italic text-sand/90">
-              Non pas pour craindre le temps — pour l'habiter.
+              {t.onboarding.introItalic}
             </p>
             <button
               onClick={() => setStep(1)}
               className="mt-9 rounded-full bg-sand px-8 py-3 font-sans text-sm font-semibold tracking-wide text-dusk-deep transition hover:bg-sand-light hover:shadow-glow"
             >
-              Commencer
+              {t.onboarding.begin}
             </button>
             <p className="mt-4 font-sans text-xs text-haze/70">
-              Tout reste sur cet appareil. Aucun compte.
+              {t.onboarding.privacy}
             </p>
           </>
         )}
@@ -51,9 +52,9 @@ export default function Onboarding({
         {step === 1 && (
           <>
             <h2 className="font-display text-3xl font-medium text-bone sm:text-4xl">
-              Quel jour le sable a-t-il commencé à couler?
+              {t.onboarding.birthQuestion}
             </h2>
-            <p className="mt-3 font-serif text-haze">Ta date de naissance, une seule fois.</p>
+            <p className="mt-3 font-serif text-haze">{t.onboarding.birthHint}</p>
 
             <div className="mx-auto mt-8 max-w-xs">
               <input
@@ -71,12 +72,12 @@ export default function Onboarding({
                   onClick={() => setShowExpectancy(true)}
                   className="mt-5 font-sans text-xs text-haze underline-offset-4 hover:text-sand link-underline"
                 >
-                  Ajuster l'espérance de vie ({expectancy} ans)
+                  {t.onboarding.adjustExpectancy(expectancy)}
                 </button>
               ) : (
                 <div className="mt-6 animate-fadeIn">
                   <label className="font-sans text-xs uppercase tracking-[0.18em] text-haze">
-                    Espérance de vie : {expectancy} ans
+                    {t.onboarding.expectancyLabel(expectancy)}
                   </label>
                   <input
                     type="range"
@@ -87,7 +88,7 @@ export default function Onboarding({
                     className="mt-3 w-full accent-rose"
                   />
                   <p className="mt-2 font-serif text-xs italic text-haze/80">
-                    Un repère, rien de plus. On peut le changer à tout moment.
+                    {t.onboarding.expectancyHint}
                   </p>
                 </div>
               )}
@@ -98,14 +99,14 @@ export default function Onboarding({
                 onClick={() => setStep(0)}
                 className="font-sans text-sm text-haze hover:text-bone"
               >
-                Retour
+                {t.onboarding.back}
               </button>
               <button
                 disabled={!valid}
                 onClick={() => valid && onDone(birthdate, expectancy)}
                 className="rounded-full bg-sand px-8 py-3 font-sans text-sm font-semibold tracking-wide text-dusk-deep transition enabled:hover:bg-sand-light enabled:hover:shadow-glow disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Entrer dans le sablier
+                {t.onboarding.enter}
               </button>
             </div>
           </>

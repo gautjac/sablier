@@ -1,48 +1,51 @@
-import { frNum, type LifeStats } from "../time";
+import { localNum, type LifeStats } from "../time";
+import { useLang } from "../i18n";
 
 /**
  * Stats that comfort, not scare. Weeks lived, the season of life, a gentle
  * percentage — every figure framed toward presence, never fear.
  */
 export default function Stats({ stats }: { stats: LifeStats }) {
+  const { t, lang } = useLang();
   const pct = stats.percentLived;
+  const season = t.season[stats.seasonKey];
 
   return (
     <section className="grid gap-4 sm:grid-cols-3">
       {/* Season of life — the warm centrepiece */}
       <div className="sm:col-span-3 rounded-2xl border border-sand/15 bg-dusk-soft/50 p-6 text-center">
         <p className="font-sans text-[0.68rem] uppercase tracking-[0.22em] text-haze/70">
-          Ta saison
+          {t.season.kicker}
         </p>
-        <p className="mt-2 font-display text-4xl font-medium text-sand">{stats.season.label}</p>
-        <p className="mx-auto mt-2 max-w-md font-serif italic text-haze">{stats.season.note}</p>
+        <p className="mt-2 font-display text-4xl font-medium text-sand">{season.label}</p>
+        <p className="mx-auto mt-2 max-w-md font-serif italic text-haze">{season.note}</p>
       </div>
 
       <Stat
-        big={frNum(stats.weeksLived)}
-        label="semaines déjà vécues"
-        note="autant de dimanches, de matins, de chansons."
+        big={localNum(stats.weeksLived, lang)}
+        label={t.stats.weeksLivedLabel}
+        note={t.stats.weeksLivedNote}
       />
       <Stat
-        big={`${stats.ageYears} ans`}
-        label="d'expérience accumulée"
-        note="rien de tout cela ne se reprend — et c'est bien."
+        big={t.stats.ageBig(stats.ageYears)}
+        label={t.stats.ageLabel}
+        note={t.stats.ageNote}
       />
       <Stat
-        big={frNum(stats.weeksAhead)}
-        label="semaines encore ouvertes"
-        note="autant d'invitations à être présent."
+        big={localNum(stats.weeksAhead, lang)}
+        label={t.stats.weeksAheadLabel}
+        note={t.stats.weeksAheadNote}
       />
 
       {/* the soft progress arc */}
       <div className="sm:col-span-3 rounded-2xl border border-sand/15 bg-dusk-soft/40 p-6">
         <div className="flex items-baseline justify-between">
           <p className="font-sans text-sm text-haze">
-            Le sable a coulé d'environ{" "}
+            {t.stats.progressLead}{" "}
             <span className="font-semibold text-sand">{pct.toFixed(1)} %</span>
           </p>
           <p className="font-sans text-xs text-haze/60">
-            sur ~{stats.expectancyYears} ans · {frNum(stats.totalWeeks)} semaines
+            {t.stats.progressRight(stats.expectancyYears, localNum(stats.totalWeeks, lang))}
           </p>
         </div>
         <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-dusk-deep/80">
@@ -52,8 +55,7 @@ export default function Stats({ stats }: { stats: LifeStats }) {
           />
         </div>
         <p className="mt-3 font-serif text-sm italic text-haze/80">
-          Ce n'est pas un compte à rebours. C'est une mesure de tout ce que tu as
-          déjà eu la chance de traverser — et de ce qui reste à goûter.
+          {t.stats.progressNote}
         </p>
       </div>
     </section>

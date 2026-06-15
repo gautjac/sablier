@@ -4,6 +4,8 @@ import { db, type Profile } from "./db";
 import { computeLifeStats, todayISO } from "./time";
 import { promptForDate } from "./prompts";
 import { getStreak, recomputeStreak } from "./streak";
+import { useLang } from "./i18n";
+import LangToggle from "./components/LangToggle";
 import FallingSand from "./components/FallingSand";
 import Onboarding from "./components/Onboarding";
 import DayCard from "./components/DayCard";
@@ -17,6 +19,7 @@ const PROFILE_ID = 1;
 type View = "jour" | "vie";
 
 export default function App() {
+  const { t, lang } = useLang();
   const profile = useLiveQuery(() => db.profile.get(PROFILE_ID), [], undefined);
   const today = todayISO();
   const todayAnswer = useLiveQuery(() => db.answers.get(today), [today], undefined);
@@ -34,7 +37,7 @@ export default function App() {
   if (profile === undefined) {
     return (
       <main className="flex min-h-[100dvh] items-center justify-center">
-        <p className="animate-breathe font-display text-2xl text-sand">Sablier…</p>
+        <p className="animate-breathe font-display text-2xl text-sand">{t.loading}</p>
       </main>
     );
   }
@@ -54,6 +57,9 @@ export default function App() {
       <>
         <FallingSand />
         <main className="relative z-10">
+          <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6">
+            <LangToggle />
+          </div>
           <Onboarding onDone={completeOnboarding} />
         </main>
       </>
@@ -66,34 +72,37 @@ export default function App() {
   }
 
   const stats = computeLifeStats(profile.birthdate, profile.expectancyYears, today);
-  const prompt = promptForDate(today);
+  const prompt = promptForDate(today, lang);
 
   return (
     <>
       <FallingSand />
       <div className="relative z-10 mx-auto min-h-[100dvh] max-w-4xl px-5 pb-24 pt-8 sm:px-8">
         {/* header */}
-        <header className="flex items-center justify-between">
+        <header className="flex items-center justify-between gap-3">
           <button
             onClick={() => setView("jour")}
             className="text-left"
-            aria-label="Sablier — accueil"
+            aria-label={t.nav.homeAria}
           >
             <h1 className="font-display text-2xl font-semibold tracking-tight text-bone">
-              Sablier
+              {t.appName}
             </h1>
             <p className="font-sans text-[0.62rem] uppercase tracking-[0.24em] text-haze/70">
-              memento vivere
+              {t.tagline}
             </p>
           </button>
 
-          <div className="flex items-center gap-1 rounded-full border border-sand/20 bg-dusk-soft/50 p-1 font-sans text-sm">
-            <Tab active={view === "jour"} onClick={() => setView("jour")}>
-              Le jour
-            </Tab>
-            <Tab active={view === "vie"} onClick={() => setView("vie")}>
-              La vie
-            </Tab>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 rounded-full border border-sand/20 bg-dusk-soft/50 p-1 font-sans text-sm">
+              <Tab active={view === "jour"} onClick={() => setView("jour")}>
+                {t.nav.day}
+              </Tab>
+              <Tab active={view === "vie"} onClick={() => setView("vie")}>
+                {t.nav.life}
+              </Tab>
+            </div>
+            <LangToggle />
           </div>
         </header>
 
@@ -113,19 +122,17 @@ export default function App() {
             <section>
               <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
                 <h2 className="font-display text-3xl font-medium text-bone">
-                  La vie en semaines
+                  {t.life.title}
                 </h2>
                 <button
                   onClick={() => setShowSettings(true)}
                   className="font-sans text-xs text-haze hover:text-sand link-underline"
                 >
-                  Réglages · {profile.expectancyYears} ans
+                  {t.life.settingsLink(profile.expectancyYears)}
                 </button>
               </div>
               <p className="mb-6 max-w-xl font-serif italic text-haze">
-                Une case par semaine. Celles que tu as vécues sont remplies de
-                sable ; celle-ci, en rose, est maintenant ; les autres restent
-                ouvertes. Survole une case pour la lire.
+                {t.life.intro}
               </p>
               <WeekGrid stats={stats} birthdate={profile.birthdate} />
               <Legend />
@@ -136,8 +143,7 @@ export default function App() {
         )}
 
         <footer className="mt-16 text-center font-serif text-sm italic text-haze/60">
-          « Il n'est pas vrai que nous ayons peu de temps : la vérité, c'est que
-          nous en perdons beaucoup. » — d'après Sénèque
+          {t.footer.quote}
         </footer>
       </div>
 
@@ -177,18 +183,19 @@ function Tab({
 }
 
 function Legend() {
+  const { t } = useLang();
   return (
     <div className="mt-5 flex flex-wrap items-center justify-center gap-5 font-sans text-xs text-haze">
       <span className="flex items-center gap-2">
-        <span className="inline-block h-3 w-3 rounded-[3px] bg-sand/60" /> vécue
+        <span className="inline-block h-3 w-3 rounded-[3px] bg-sand/60" /> {t.life.legendLived}
       </span>
       <span className="flex items-center gap-2">
-        <span className="inline-block h-3 w-3 rounded-[3px] bg-sand ring-2 ring-rose" /> cette
-        semaine
+        <span className="inline-block h-3 w-3 rounded-[3px] bg-sand ring-2 ring-rose" />{" "}
+        {t.life.legendCurrent}
       </span>
       <span className="flex items-center gap-2">
-        <span className="inline-block h-3 w-3 rounded-[3px] border border-bone/25 bg-bone/5" /> à
-        venir
+        <span className="inline-block h-3 w-3 rounded-[3px] border border-bone/25 bg-bone/5" />{" "}
+        {t.life.legendAhead}
       </span>
     </div>
   );
